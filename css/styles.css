@@ -3,6 +3,9 @@
     --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
     --font-body: var(--font-outfit);
     --font-display: var(--font-outfit);
+    /* Hero cinematográfico: carimbo condensado + saga gravada épica. */
+    --font-hero-stamp: "Anton", ui-sans-serif, system-ui, sans-serif;
+    --font-hero-saga: "Oswald", "Outfit", ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
   
     --fw-regular: 400;
@@ -399,18 +402,20 @@
     box-shadow: var(--shadow-star-inner);
   }
 
-  /* Título: linha1 --text-primary, linha2 --accent-star (spec §5). */
+  /*
+   * Título cinematográfico tipo pôster:
+   *  línea1 "Dragon Ball Z" = carimbo condensado (Anton), aço frio.
+   *  línea2 "A Saga do Freeza" = saga épica gravada (Cinzel) com gradiente
+   *  Super Saiyajin (ouro→laranja), aura de energia e brilho metálico.
+   */
   .hero__title {
-    margin: var(--space-5) 0 var(--space-3);
+    margin: var(--space-6) 0 var(--space-3);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-1);
-    font-family: var(--font-display);
-    letter-spacing: var(--ls-tight);
-    line-height: var(--lh-tight);
+    gap: clamp(0.35rem, 1.2vw, 0.75rem);
+    line-height: 0.98;
     text-wrap: balance;
-    text-shadow: 0 2px 24px rgba(4, 6, 15, 0.9), 0 1px 4px rgba(4, 6, 15, 0.8);
   }
 
   .hero__badge,
@@ -418,17 +423,213 @@
     text-shadow: 0 1px 12px rgba(4, 6, 15, 0.85);
   }
 
-  /* Desktop: ≥80px (5rem); escala rápido a partir de ~1200px de largura. */
+  /* Linha 1 — carimbo da franquia: condensado, caixa-alta, cores DBZ. */
   .hero__title-line1 {
-    font-size: clamp(2rem, 1rem + 5.5vw, 5.125rem);
-    font-weight: var(--fw-black);
-    color: var(--text-primary);
+    position: relative;
+    font-family: var(--font-hero-stamp);
+    font-weight: 400;
+    font-size: clamp(1.9rem, 1.1rem + 4.4vw, 4.25rem);
+    text-transform: uppercase;
+    letter-spacing: clamp(0.12em, 0.45vw, 0.22em);
+    text-indent: clamp(0.12em, 0.45vw, 0.22em);
+    word-spacing: -0.22em;
+    line-height: 1;
+    filter: drop-shadow(0 5px 18px rgba(4, 6, 15, 0.8));
+    opacity: 0;
+    transform: translateY(0.7em);
+    animation: hero-title-rise 0.95s var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) 0.15s forwards;
   }
 
+  /* Borda preta de 3px em cada letra (Chrome/Safari/Firefox). */
+  .dbz-word {
+    -webkit-text-stroke: 3px #000;
+    text-stroke: 3px #000;
+  }
+
+  .dbz-word--dragon,
+  .dbz-word--ball {
+    letter-spacing: -2px;
+  }
+
+  .dbz-word--dragon {
+    color: #ffd21e;
+    text-shadow: 0 2px 0 rgba(120, 70, 0, 0.55), 0 0 22px rgba(255, 200, 40, 0.4);
+  }
+
+  .dbz-word--ball {
+    color: #e62222;
+    text-shadow: 0 2px 0 rgba(90, 8, 8, 0.6), 0 0 22px rgba(255, 50, 50, 0.38);
+  }
+
+  .dbz-word--z {
+    color: #e62222;
+    text-shadow: 0 2px 0 rgba(90, 8, 8, 0.6), 0 0 22px rgba(255, 50, 50, 0.38);
+  }
+
+  /* O "O" de Dragon vira a Esfera do Dragão: o gif cobre a letra, recortado
+     em círculo para ler como esfera mesmo que o gif tenha fundo. */
+  .dbz-o {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dbz-o-letter {
+    /* mantém a largura/posição da letra, mas invisível: a esfera a substitui */
+    color: transparent;
+    -webkit-text-stroke-color: transparent;
+  }
+
+  .dbz-o-gif {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    object-fit: cover;
+    pointer-events: none;
+    box-shadow:
+      0 0 18px rgba(255, 150, 40, 0.55),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  }
+
+  /* Régua de energia sob o carimbo. */
+  .hero__title-line1::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -0.1em;
+    width: clamp(96px, 22vw, 200px);
+    height: 2px;
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    border-radius: var(--radius-full);
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--accent-star) 25%,
+      var(--cosmic-rose) 50%,
+      var(--accent-star) 75%,
+      transparent 100%
+    );
+    box-shadow: 0 0 14px var(--accent-star-glow);
+    animation: hero-rule-grow 0.8s var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) 0.6s forwards;
+  }
+
+  /* Linha 2 — a saga: condensada (Oswald), gradiente Freeza roxo→ciano. */
   .hero__title-line2 {
-    font-size: clamp(1.875rem, 1.25rem + 5vw, 5rem);
-    font-weight: var(--fw-black);
-    color: var(--accent-star);
+    position: relative;
+    margin-top: clamp(0.3rem, 1.2vw, 0.7rem);
+    font-family: var(--font-hero-saga);
+    font-weight: 700;
+    font-size: clamp(1.35rem, 0.8rem + 4vw, 4rem);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 0.98;
+    background: linear-gradient(
+      102deg,
+      #e3c6ff 0%,
+      #a96bff 24%,
+      #6c2bd9 48%,
+      #2f7dff 74%,
+      #29e0ff 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px #000;
+    text-stroke: 2px #000;
+    filter: drop-shadow(0 2px 3px rgba(4, 6, 15, 0.85))
+      drop-shadow(0 0 26px rgba(120, 80, 255, 0.45));
+    opacity: 0;
+    transform: translateY(0.5em) scale(0.97);
+    animation:
+      hero-saga-ignite 1.1s var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)) 0.42s forwards,
+      hero-freeza-sheen 8s ease-in-out 1.6s infinite;
+  }
+
+  /* Aura de energia pulsante atrás da saga. */
+  .hero__title-line2::before {
+    content: "";
+    position: absolute;
+    inset: -24% -12%;
+    z-index: -1;
+    background: radial-gradient(
+      ellipse 60% 70% at 50% 50%,
+      rgba(140, 90, 255, 0.42) 0%,
+      rgba(41, 194, 255, 0.18) 44%,
+      transparent 72%
+    );
+    filter: blur(15px);
+    opacity: 0;
+    animation:
+      hero-aura-in 1.2s ease-out 0.6s forwards,
+      hero-aura-pulse 4.5s ease-in-out 1.8s infinite;
+  }
+
+  @keyframes hero-title-rise {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-saga-ignite {
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes hero-rule-grow {
+    to {
+      transform: translateX(-50%) scaleX(1);
+    }
+  }
+
+  @keyframes hero-freeza-sheen {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes hero-aura-in {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes hero-aura-pulse {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__title-line1,
+    .hero__title-line2,
+    .hero__title-line2::before {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    .hero__title-line1::after {
+      animation: none;
+      transform: translateX(-50%) scaleX(1);
+    }
   }
 
   .hero__subtitle {
@@ -575,13 +776,60 @@
   }
 
   .hero__scroll-text {
+    position: relative;
     font-family: var(--font-body);
     font-size: var(--fs-2xs);
-    font-weight: var(--fw-medium);
-    letter-spacing: var(--ls-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
     line-height: var(--lh-none);
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--text-primary) 88%, transparent);
+    color: color-mix(in srgb, var(--text-primary) 78%, transparent);
+    text-shadow: 0 1px 10px rgba(4, 6, 15, 0.8);
+  }
+
+  /* Fio de energia descendente sob o rótulo. */
+  .hero__scroll-text::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 0.85rem);
+    width: 1px;
+    height: 2.4rem;
+    transform: translateX(-50%);
+    background: linear-gradient(
+      180deg,
+      var(--accent-star) 0%,
+      color-mix(in srgb, var(--accent-star) 35%, transparent) 60%,
+      transparent 100%
+    );
+    box-shadow: 0 0 8px var(--accent-star-glow);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 40%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 0%, #000 40%, transparent 100%);
+    animation: hero-scroll-line 2s ease-in-out infinite;
+  }
+
+  @keyframes hero-scroll-line {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) scaleY(0.2);
+      transform-origin: top;
+    }
+    35% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) scaleY(1);
+      transform-origin: top;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__scroll-text::after {
+      animation: none;
+      opacity: 0.7;
+    }
   }
 
   @media (max-width: 767.98px) {
