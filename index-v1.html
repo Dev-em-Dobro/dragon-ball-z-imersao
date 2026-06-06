@@ -9,18 +9,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Anton&family=Fredoka:wght@500;600;700&family=Oswald:wght@500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-    <div class="page-bg" aria-hidden="true">
-        <video class="page-bg__video" autoplay loop muted playsinline preload="auto">
-            <source src="assets/videos/magnific_animate-the-uploaded-supe_y6HcekzPW9.mp4" type="video/mp4">
-        </video>
-    </div>
 
 
     <nav class="floating-nav" aria-label="Navegação principal da página">
@@ -51,40 +46,49 @@
 
     <main id="conteudo-principal">
         <section id="hero" class="hero" aria-labelledby="hero-heading">
-            <div class="hero__media-layer" aria-hidden="true">
-                <video class="hero__goku" autoplay loop muted playsinline>
-                    <source src="assets/videos/goku-clip-alpha.webm" type="video/webm">
-                    <source src="assets/videos/goku-clip-min.mp4" type="video/mp4">
-                </video>
-                <video class="hero__vegeta" autoplay loop muted playsinline>
-                    <source src="assets/videos/vegeta-clip-alpha.webm" type="video/webm">
-                    <source src="assets/videos/vegeta-clip-min.mp4" type="video/mp4">
-                </video>
-                <video class="hero__planet" autoplay loop muted playsinline>
-                    <source src="assets/videos/namekusei-3d-alpha.webm" type="video/webm">
-                    <source src="assets/videos/namekusei-3d-min.mp4" type="video/mp4">
-                </video>
-            </div>
-
-            <div class="hero__content-layer">
-                <div class="hero__top">
-                    <h1 id="hero-heading" class="hero__title">
-                        <span class="hero__title-line1">
-                            <span class="dbz-word dbz-word--dragon">Drag<span class="dbz-o"><span
-                                        class="dbz-o-letter">o</span><img class="dbz-o-gif"
-                                        src="assets/images/magnific_create-a-3d-animation-of-_xgIP444jfW.gif" alt=""
-                                        aria-hidden="true" width="80" height="80"></span>n</span>
-                            <span class="dbz-word dbz-word--ball">Ball</span>
-                            <span class="dbz-word dbz-word--z">Z</span>
-                        </span>
-                        <span class="hero__title-line2">A Saga do Freeza</span>
-                    </h1>
+            <!-- HERO V1 — fundo de vídeo em loop + overlay dramático -->
+            <div class="hero__bg" aria-hidden="true">
+                <div class="hero__bg-inner">
+                    <video class="hero__bg-video" autoplay loop muted playsinline preload="auto">
+                        <source src="assets/videos/magnific_epic-destroyed-alien-plan_EqTQF2ruuO.mp4" type="video/mp4">
+                    </video>
+                    <div class="hero__overlay"></div>
+                    <!-- "Spotlight" escuro atrás do Goku: o screen contra fundo escuro
+                         deixa o Goku SÓLIDO (sem o aspecto lavado/transparente). -->
+                    <div class="hero__goku-glow" aria-hidden="true"></div>
+                    <!-- Goku em vídeo: fundo preto removido via mix-blend-mode: screen,
+                         por isso precisa ficar na MESMA camada do vídeo de fundo (backdrop). -->
+                    <video class="hero__figure hero__figure--goku" autoplay loop muted playsinline preload="auto">
+                        <source src="assets/videos/goku-hero.mp4" type="video/mp4">
+                    </video>
+                    <!-- Spotlight escuro atrás do Freeza (mesma lógica do Goku). -->
+                    <div class="hero__freeza-glow" aria-hidden="true"></div>
+                    <video class="hero__figure hero__figure--freeza" autoplay loop muted playsinline preload="auto">
+                        <source src="assets/videos/freeza-hero.mp4" type="video/mp4">
+                    </video>
                 </div>
-                
             </div>
 
-            <div class="hero__scroll-indicator">
-                <span class="hero__scroll-text">ROLE PARA EXPLORAR</span>
+            <div class="hero__stage">
+                <div class="hero__overlay hero__overlay--front" aria-hidden="true"></div>
+
+                <div class="hero__poster hero__poster--compact">
+                    <h1 id="hero-heading" class="hero__poster-title">
+                        <span class="hero__poster-line hero__poster-line--top">Dragon Ball Z</span>
+                        <span class="hero__poster-line hero__poster-line--bottom">A Saga de Freeza</span>
+                    </h1>
+                    <p class="hero__poster-tag">A batalha que forjou uma lenda</p>
+                </div>
+
+                <a href="#personagens" class="hero__scroll" aria-label="Rolar para a seção de personagens">
+                    <span class="hero__scroll-label">Role para começar</span>
+                    <span class="hero__scroll-arrow" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                            stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </span>
+                </a>
             </div>
         </section>
 

@@ -1993,3 +1993,425 @@
       --pers-img-w: clamp(120px, 46vw, 190px);
     }
   }
+
+  /* =========================================================================
+     HERO V1 — fundo de vídeo em loop + overlay dramático
+     (usado em index-v1.html; pinado na viewport via sticky pois a hero é alta)
+     ========================================================================= */
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: clip;
+    pointer-events: none;
+  }
+
+  /* Mantém o vídeo do tamanho da viewport e fixo enquanto rola a hero alta. */
+  .hero__bg-inner {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100svh;
+  }
+
+  .hero__bg-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  /* Overlay dramático: vinheta + escurecimento topo/base para profundidade e
+     legibilidade, com leve tinta cósmica/laranja por cima. */
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(125% 85% at 50% 35%,
+        transparent 0%,
+        rgba(4, 6, 15, 0.04) 55%,
+        rgba(4, 6, 15, 0.14) 100%),
+      linear-gradient(to bottom,
+        rgba(4, 6, 15, 0.10) 0%,
+        transparent 35%,
+        transparent 65%,
+        rgba(4, 6, 15, 0.30) 100%),
+      linear-gradient(120deg,
+        rgba(108, 43, 217, 0.06) 0%,
+        transparent 45%,
+        rgba(255, 122, 24, 0.06) 100%);
+  }
+
+  /* Palco do personagem — pinado na viewport junto com o vídeo de fundo,
+     fica ACIMA do overlay para o Goku aparecer vívido (sem escurecer). */
+  .hero__stage {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: 100svh;
+    pointer-events: none;
+    /* Anula o padding-inline da .hero para o Goku grudar na borda real. */
+    margin-inline: calc(-1 * var(--space-gutter-x));
+  }
+
+  /* Overlay sobre o Goku — versão mais suave que a do cenário:
+     só uma vinheta leve e um respiro escuro na base, sem apagar o personagem. */
+  .hero__overlay--front {
+    background:
+      radial-gradient(120% 90% at 35% 40%,
+        transparent 0%,
+        rgba(4, 6, 15, 0.10) 60%,
+        rgba(4, 6, 15, 0.34) 100%),
+      linear-gradient(to bottom,
+        rgba(4, 6, 15, 0.22) 0%,
+        transparent 30%,
+        transparent 70%,
+        rgba(4, 6, 15, 0.55) 100%);
+  }
+
+  /* Goku ancorado à borda esquerda, em altura cheia, como na referência.
+     clip-path corta a faixa branca da direita da imagem (≈ 41% finais). */
+  .hero__figure--goku {
+    position: absolute;
+    left: -20px;
+    bottom: 0;
+    height: min(100%, 96svh);
+    width: auto;
+    object-fit: contain;
+    object-position: left bottom;
+    /* Vídeo de fundo preto sólido: "screen" zera o preto (fica transparente)
+       e deixa só o Goku brilhante sobre o vídeo de fundo. Sem precisar de alpha. */
+    mix-blend-mode: screen;
+    /* Corta a base do frame onde fica a marca d'água "XingAi 3.0"... */
+    clip-path: inset(0 0 5% 0);
+    /* ...e empurra pra baixo o mesmo tanto, pra grudar na base sem vão. */
+    transform: translateY(5%);
+    /* Contraste/saturação compensam o leve "lavado" inerente ao screen. */
+    filter: contrast(1.12) saturate(1.15) drop-shadow(0 8px 40px rgba(255, 180, 40, 0.28));
+  }
+
+  /* Mancha escura atrás do Goku — torna o screen "sólido" naquela região. */
+  .hero__goku-glow {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: min(58%, 40rem);
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(
+      66% 72% at 30% 60%,
+      rgba(4, 6, 15, 0.82) 0%,
+      rgba(4, 6, 15, 0.58) 42%,
+      rgba(4, 6, 15, 0.22) 66%,
+      transparent 82%
+    );
+  }
+
+  /* Freeza ancorado à borda direita, espelhando o Goku (encara o centro). */
+  .hero__figure--freeza {
+    position: absolute;
+    right: -140px;
+    bottom: 0;
+    /* Maior que o Goku no enquadramento original do vídeo, então ampliado
+       pra que os dois personagens fiquem do mesmo tamanho aparente. */
+    height: min(106%, 102svh);
+    width: auto;
+    object-fit: contain;
+    object-position: right bottom;
+    /* Mesmo tratamento do Goku: remove o fundo preto do vídeo. */
+    mix-blend-mode: screen;
+    clip-path: inset(0 0 5% 0);
+    transform: translateY(27%);
+    filter: contrast(1.12) saturate(1.12) drop-shadow(0 8px 40px rgba(170, 70, 220, 0.30));
+  }
+
+  /* Mancha escura atrás do Freeza — deixa o screen "sólido" naquela região. */
+  .hero__freeza-glow {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: min(58%, 40rem);
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(
+      66% 72% at 70% 60%,
+      rgba(4, 6, 15, 0.82) 0%,
+      rgba(4, 6, 15, 0.58) 42%,
+      rgba(4, 6, 15, 0.22) 66%,
+      transparent 82%
+    );
+  }
+
+  @media (max-width: 767.98px) {
+    .hero__figure--goku,
+    .hero__figure--freeza {
+      height: min(100%, 64svh);
+    }
+  }
+
+  /* -------------------------------------------------------------------------
+     HERO V1 — Título cinematográfico (estilo logo DBZ / Saga do Freeza)
+     ------------------------------------------------------------------------- */
+  .hero__title-wrap {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    z-index: 3;
+    transform: translate(-50%, -50%);
+    width: min(92%, 60rem);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .hero__title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: var(--lh-none);
+  }
+
+  /* "DRAGON BALL Z" — carimbo condensado dourado acima do nome */
+  .hero__title-kicker {
+    font-family: var(--font-hero-saga);
+    font-weight: var(--fw-bold);
+    font-size: clamp(0.9rem, 0.6rem + 1.6vw, 1.6rem);
+    letter-spacing: 0.42em;
+    text-indent: 0.42em;
+    text-transform: uppercase;
+    color: var(--cosmic-rose);
+    text-shadow: 0 0 18px rgba(255, 210, 63, 0.45);
+    margin-bottom: clamp(0.5rem, 1.2vw, 0.9rem);
+  }
+
+  .hero__title-z {
+    color: var(--accent-star);
+    text-shadow: 0 0 22px var(--accent-star-glow);
+  }
+
+  /* "A Saga de" — manuscrito épico, leve inclinação, em Oswald */
+  .hero__title-saga {
+    font-family: var(--font-hero-saga);
+    font-weight: var(--fw-medium);
+    font-style: italic;
+    font-size: clamp(1.1rem, 0.7rem + 2.2vw, 2.2rem);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-primary);
+    text-shadow: 0 2px 16px rgba(4, 6, 15, 0.85);
+    transform: rotate(-3deg);
+    margin-bottom: clamp(-0.4rem, -1vw, -0.2rem);
+  }
+
+  /* "FREEZA" — peça principal: metal dourado→laranja, contorno e brilho */
+  .hero__title-name {
+    position: relative;
+    font-family: var(--font-hero-stamp);
+    font-weight: 400;
+    font-size: clamp(3.5rem, 1.5rem + 13vw, 11rem);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 0.9;
+    background: linear-gradient(
+      180deg,
+      #fff3c4 0%,
+      var(--cosmic-rose) 34%,
+      var(--accent-star) 64%,
+      #b3470a 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 4px 2px rgba(0, 0, 0, 0.55));
+  }
+
+  /* Camada de contorno + halo cósmico atrás do gradiente do nome */
+  .hero__title-name::before {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    -webkit-text-stroke: clamp(2px, 0.5vw, 6px) #1a0d2e;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    text-shadow:
+      0 0 28px rgba(255, 122, 24, 0.55),
+      0 0 60px rgba(108, 43, 217, 0.45);
+  }
+
+  /* Tagline abaixo do nome */
+  .hero__title-tag {
+    margin: clamp(0.6rem, 1.6vw, 1.2rem) 0 0;
+    font-family: var(--font-hero-saga);
+    font-weight: var(--fw-medium);
+    font-size: clamp(0.7rem, 0.55rem + 0.7vw, 1rem);
+    letter-spacing: 0.32em;
+    text-indent: 0.32em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-shadow: 0 2px 12px rgba(4, 6, 15, 0.9);
+  }
+
+  @media (max-width: 767.98px) {
+    .hero__title-wrap {
+      top: 42%;
+    }
+  }
+
+  /* -------------------------------------------------------------------------
+     HERO V2 — Título estilo "pôster" (inspirado no titulo.png), tema DBZ
+     pill + 2 linhas grandes arredondadas (branca + dourada) + subtítulo
+     ------------------------------------------------------------------------- */
+  .hero__poster {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    z-index: 3;
+    transform: translate(-50%, -50%);
+    width: min(92%, 64rem);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  /* Pill/badge: "A Saga Lendária" */
+  .hero__poster-badge {
+    display: inline-block;
+    font-family: var(--font-hero-saga);
+    font-weight: var(--fw-bold);
+    font-size: clamp(0.72rem, 0.55rem + 0.7vw, 1rem);
+    letter-spacing: 0.26em;
+    text-indent: 0.26em;
+    text-transform: uppercase;
+    color: var(--accent-star);
+    padding: 0.55em 1.4em;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 210, 63, 0.45);
+    background: rgba(4, 6, 15, 0.55);
+    box-shadow:
+      0 0 24px rgba(255, 122, 24, 0.25),
+      inset 0 0 18px rgba(255, 210, 63, 0.10);
+    backdrop-filter: blur(4px);
+    margin-bottom: clamp(1rem, 2.4vw, 1.8rem);
+  }
+
+  .hero__poster-title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Fredoka", var(--font-base);
+    font-weight: 700;
+    line-height: 0.98;
+    text-transform: none;
+  }
+
+  .hero__poster-line {
+    font-size: clamp(2.6rem, 1rem + 9vw, 7.5rem);
+    letter-spacing: -0.01em;
+  }
+
+  /* Variante compacta (usada no v1): ~30% menor que o pôster padrão. */
+  .hero__poster--compact .hero__poster-line {
+    font-size: clamp(1.82rem, 0.7rem + 6.3vw, 5.25rem);
+  }
+
+  /* Linha de cima — branca sólida, como no "Super Mario" */
+  .hero__poster-line--top {
+    color: #fdfdff;
+    text-shadow:
+      0 2px 0 rgba(0, 0, 0, 0.25),
+      0 6px 30px rgba(4, 6, 15, 0.7),
+      0 0 40px rgba(120, 170, 255, 0.2);
+  }
+
+  /* Linha de baixo — amarelo claro e legível (como o "Galaxy: O Filme") */
+  .hero__poster-line--bottom {
+    color: #ffd23f;
+    text-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.7),
+      0 3px 2px rgba(0, 0, 0, 0.5),
+      0 0 28px rgba(255, 180, 40, 0.35);
+  }
+
+  .hero__poster-tag {
+    margin: clamp(0.9rem, 2vw, 1.6rem) 0 0;
+    font-family: var(--font-hero-saga);
+    font-weight: var(--fw-medium);
+    font-size: clamp(0.72rem, 0.55rem + 0.7vw, 1.05rem);
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-shadow: 0 2px 12px rgba(4, 6, 15, 0.9);
+  }
+
+  @media (max-width: 767.98px) {
+    .hero__poster {
+      top: 42%;
+    }
+  }
+
+  /* Indicador "Role para começar" + seta com bob suave, fixo na base da hero. */
+  .hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(2rem, 5vh, 4rem);
+    z-index: 4;
+    transform: translateX(-50%);
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0.6rem;
+    pointer-events: auto;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+  }
+
+  .hero__scroll:hover {
+    color: var(--accent-star);
+  }
+
+  .hero__scroll-label {
+    font-family: var(--font-hero-saga);
+    font-weight: var(--fw-semibold);
+    font-size: clamp(0.7rem, 0.55rem + 0.55vw, 0.9rem);
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 12px rgba(4, 6, 15, 0.9);
+  }
+
+  .hero__scroll-arrow {
+    display: grid;
+    place-items: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 210, 63, 0.5);
+    background: rgba(4, 6, 15, 0.4);
+    box-shadow: 0 0 18px rgba(255, 122, 24, 0.25);
+    color: var(--accent-star);
+    backdrop-filter: blur(3px);
+    animation: hero-scroll-bob 1.8s ease-in-out infinite;
+  }
+
+  @keyframes hero-scroll-bob {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(8px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__scroll-arrow {
+      animation: none;
+    }
+  }

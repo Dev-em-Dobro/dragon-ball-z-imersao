@@ -310,148 +310,114 @@ function initFloatingNav() {
   onScrollOrResize();
 }
 
-function initGokuScrollAnimation() {
-  if(typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-  
-  gsap.registerPlugin(ScrollTrigger);
-
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: '+=100%',
-      scrub: true
-    }
-  })
-
-   tl.to('.hero__goku', { y: '100vh', ease: 'none', duration: 1 }, 0)
-   .to('.hero__goku', { opacity: 0, ease: 'none', duration: 0.5 }, 0.5)
-}
-
-function initVegetaScrollAnimation() {
-  if(typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-  
-  gsap.registerPlugin(ScrollTrigger);
-
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: '+=100%',
-      scrub: true
-    }
-  })
-
-   tl.to('.hero__vegeta', { y: '100vh', ease: 'none', duration: 1 }, 0)
-   .to('.hero__vegeta', { opacity: 0, ease: 'none', duration: 0.5 }, 0.5)
-}
-
-function initHeroContentScrollAnimation() {
-  if(typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-  
-  gsap.registerPlugin(ScrollTrigger);
-
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: '+=100%',
-      scrub: true,
-      pin: '.hero__content-layer',
-      pinSpacing: false,
-      invalidateOnRefresh: true
-    }
-  })
-
-   // fromTo com início explícito (opacity: 1) — garante que ao voltar pro topo
-   // o texto sempre reaparece, mesmo após um refresh do ScrollTrigger.
-   .fromTo('.hero__content-layer',
-     { opacity: 1 },
-     { opacity: 0, ease: 'none', duration: 0.5 }, 0.5)
-
-   const tl2 = gsap.timeline({
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: '+=100%',
-      scrub: true,
-      pin: '.hero__scroll-indicator',
-      pinSpacing: false,
-      invalidateOnRefresh: true
-    }
-  })
-
-   .fromTo('.hero__scroll-indicator',
-     { opacity: 1 },
-     { opacity: 0, ease: 'none', duration: 0.1 }, 0.1)
-}
-
-function initPlanetZoomAnimation() {
+/**
+ * Sequência cinematográfica da hero (v1/v2) com GSAP + ScrollTrigger.
+ * O fundo (.hero__bg-inner) e o palco (.hero__stage) já ficam "pinned" via
+ * position: sticky no CSS — então aqui só animamos os elementos com `scrub`
+ * enquanto a hero está fixa, sem precisar do pin do ScrollTrigger.
+ *
+ * Atos:
+ *  1. Entrada do título (linhas em stagger) ao carregar.
+ *  2. Goku (esq.) e Freeza (dir.) avançam para o centro + leve zoom no scroll.
+ *  3. Zoom lento do vídeo de fundo.
+ *  4. Título e seta "Role para começar" somem ao rolar.
+ */
+function initHeroScroll() {
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
   gsap.registerPlugin(ScrollTrigger);
 
-  const planet = document.querySelector('.hero__planet');
-  if (!planet) return;
+  const hero = document.getElementById('hero');
+  if (!hero) return;
 
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: '+=100%',
-      scrub: true,
-    },
-  }  ).fromTo(
-    planet,
-    {
-      xPercent: -50,
-      yPercent: 50,
-      scale: 1,
-      force3D: true,
-      transformOrigin: '50% 100%',
-    },
-    {
-      xPercent: -50,
-      yPercent: 50,
-      scale: 2.5,
-      ease: 'none',
-      duration: 1,
-    },
-    0
-  );
-}
+  const goku = document.querySelector('.hero__figure--goku');
+  const freeza = document.querySelector('.hero__figure--freeza');
+  const gokuGlow = document.querySelector('.hero__goku-glow');
+  const freezaGlow = document.querySelector('.hero__freeza-glow');
+  const bgVideo = document.querySelector('.hero__bg-video');
+  const poster = document.querySelector('.hero__poster');
+  const lines = gsap.utils.toArray('.hero__poster-line');
+  const arrow = document.querySelector('.hero__scroll');
 
-function initBackgroundVideoZoom() {
-  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+  const mm = gsap.matchMedia();
 
-  gsap.registerPlugin(ScrollTrigger);
+  // Desktop — sequência completa.
+  mm.add('(min-width: 768px) and (prefers-reduced-motion: no-preference)', () => {
+    if (poster && lines.length) {
+      gsap.from(lines, {
+        yPercent: 60,
+        opacity: 0,
+        filter: 'blur(10px)',
+        stagger: 0.14,
+        duration: 1.1,
+        ease: 'power3.out',
+        delay: 0.15,
+      });
+    }
 
-  const video = document.querySelector('.page-bg__video');
-  if (!video) return;
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: hero,
+        start: 'top top',
+        end: '+=90%',
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    });
 
-  gsap.timeline({
-    scrollTrigger: {
-      trigger: '#hero',
-      start: 'top top',
-      end: '+=100%',
-      scrub: true,
-    },
-  }).fromTo(
-    video,
-    {
-      scale: 1,
-      opacity: 1,
-      force3D: true,
-      transformOrigin: '50% 50%',
-    },
-    {
-      scale: 1.6,
-      opacity: 0,
-      ease: 'none',
-      duration: 1,
-    },
-    0
-  );
+    if (poster) tl.to(poster, { yPercent: -30, opacity: 0, ease: 'none', duration: 0.4 }, 0);
+    if (arrow) tl.to(arrow, { opacity: 0, ease: 'none', duration: 0.12 }, 0);
+
+    // Sem mexer em y: o GSAP preserva o translateY que o CSS já aplica
+    // (translateY 5% no Goku, 27% no Freeza) e anima só x + scale.
+    if (goku) {
+      tl.fromTo(goku,
+        { xPercent: 0, scale: 1, transformOrigin: 'left bottom' },
+        { xPercent: 16, scale: 1.1, ease: 'none', duration: 1 }, 0);
+    }
+    if (gokuGlow) tl.fromTo(gokuGlow, { xPercent: 0 }, { xPercent: 16, ease: 'none', duration: 1 }, 0);
+
+    if (freeza) {
+      tl.fromTo(freeza,
+        { xPercent: 0, scale: 1, transformOrigin: 'right bottom' },
+        { xPercent: -16, scale: 1.1, ease: 'none', duration: 1 }, 0);
+    }
+    if (freezaGlow) tl.fromTo(freezaGlow, { xPercent: 0 }, { xPercent: -16, ease: 'none', duration: 1 }, 0);
+
+    if (bgVideo) {
+      tl.fromTo(bgVideo,
+        { scale: 1, transformOrigin: '50% 50%' },
+        { scale: 1.18, ease: 'none', duration: 1 }, 0);
+    }
+  });
+
+  // Mobile — versão leve (sem mover os personagens, que já são pequenos).
+  mm.add('(max-width: 767.98px) and (prefers-reduced-motion: no-preference)', () => {
+    if (poster && lines.length) {
+      gsap.from(lines, {
+        yPercent: 40,
+        opacity: 0,
+        stagger: 0.12,
+        duration: 0.9,
+        ease: 'power3.out',
+        delay: 0.1,
+      });
+    }
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: hero,
+        start: 'top top',
+        end: '+=80%',
+        scrub: true,
+        invalidateOnRefresh: true,
+      },
+    });
+
+    if (poster) tl.to(poster, { yPercent: -20, opacity: 0, ease: 'none', duration: 0.4 }, 0);
+    if (arrow) tl.to(arrow, { opacity: 0, ease: 'none', duration: 0.12 }, 0);
+    if (bgVideo) tl.fromTo(bgVideo, { scale: 1 }, { scale: 1.12, ease: 'none', duration: 1 }, 0);
+  });
 }
 
 function initPersonagensParallax() {
@@ -978,11 +944,7 @@ function initBatalhaFinalVideoLoop() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initFloatingNav();
-  initGokuScrollAnimation();
-  initVegetaScrollAnimation();
-  initHeroContentScrollAnimation();
-  initPlanetZoomAnimation();
-  initBackgroundVideoZoom();
+  initHeroScroll();
   initPersonagensParallax();
   initPersonagensBg();
   initTrailersCarousel();
@@ -995,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof ScrollTrigger !== 'undefined') {
     window.addEventListener('load', () => ScrollTrigger.refresh());
 
-    const bgVideo = document.querySelector('.page-bg__video');
+    const bgVideo = document.querySelector('.hero__bg-video');
     const sagaVideo = document.querySelector('.saga__video');
     [bgVideo, sagaVideo].forEach((v) => {
       if (v) v.addEventListener('loadedmetadata', () => ScrollTrigger.refresh());
