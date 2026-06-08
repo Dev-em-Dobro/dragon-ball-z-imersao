@@ -1001,15 +1001,103 @@
     transition: background 500ms var(--ease-in-out-soft);
   }
 
-  #personagens-particles-js {
+  /* Véu escuro sobre a grade: deixa o fundo mais escuro e destaca os personagens.
+     Fica acima das células, mas abaixo do glow e dos blips (z-index maiores). */
+  .personagens__particles-bg::after {
+    content: "";
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    background: rgba(4, 6, 15, 0.5);
   }
 
-  #personagens-particles-js canvas {
-    pointer-events: auto;
+  /* Fundo de grade animada (porte vanilla do data-grid-hero / 21st.dev):
+     células que pulsam a partir do centro + glow que segue o cursor. */
+  .personagens__grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    gap: 5px;
+    pointer-events: none;
+    /* Foca a grade no centro e some nas bordas. */
+    -webkit-mask-image: radial-gradient(125% 95% at 50% 42%, #000 52%, transparent 100%);
+    mask-image: radial-gradient(125% 95% at 50% 42%, #000 52%, transparent 100%);
+  }
+
+  .personagens__grid .grid-cell {
+    border-radius: 2px;
+    background-color: var(--grid-color, #00ff80);
+    opacity: var(--cell-min, 0.05);
+    will-change: opacity;
+  }
+
+  @keyframes cell-pulse {
+    from {
+      opacity: var(--cell-min, 0.05);
+    }
+    to {
+      opacity: var(--cell-max, 0.5);
+    }
+  }
+
+  .personagens__grid-glow {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      220px 220px at var(--mouse-x, -999px) var(--mouse-y, -999px),
+      color-mix(in srgb, #00ff80 55%, transparent) 0%,
+      transparent 72%
+    );
+    mix-blend-mode: screen;
+    transition: opacity 320ms var(--ease-in-out-soft, ease);
+  }
+
+  /* Blips do radar do Dragon Ball: pontinhos amarelos que piscam (1 por esfera). */
+  .personagens__grid-blip {
+    position: absolute;
+    z-index: 3;
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: var(--radius-full);
+    background: #ffd23f;
+    box-shadow:
+      0 0 6px 2px rgba(255, 210, 63, 0.85),
+      0 0 16px 5px rgba(255, 160, 24, 0.45);
+    pointer-events: none;
+    animation: radar-blip 1.6s ease-in-out infinite;
+  }
+
+  @keyframes radar-blip {
+    0%,
+    100% {
+      opacity: 0.12;
+      transform: scale(0.6);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .personagens__grid .grid-cell {
+      animation: none !important;
+      opacity: 0.12;
+    }
+
+    .personagens__grid-glow {
+      display: none;
+    }
+
+    .personagens__grid-blip {
+      animation: none;
+      opacity: 0.9;
+    }
   }
 
   .personagens__header {
@@ -1124,8 +1212,8 @@
   .personagem--goku {
     
 
-    top: 3%;
-    left: 18%;
+    top: -9%;
+    left: 11%;
     z-index: 5;
     animation-delay: calc(var(--stagger-base) * 1);
   }
@@ -1133,26 +1221,27 @@
   .personagem--vegeta {
     
 
-    top: 8%;
+    --pers-img-w: clamp(140px, 22vw, 216px);
+    top: -10%;
     left: 65%;
     z-index: 4;
     animation-delay: calc(var(--stagger-base) * 2);
   }
 
   .personagem--gohan {
-    
+    --pers-img-w: clamp(150px, 23vw, 234px);
 
-    top: 65%;
-    left: 41%;
+    top: 33%;
+    left: 39%;
     z-index: 3;
     animation-delay: calc(var(--stagger-base) * 3);
   }
 
   .personagem--kuririn {
-    --pers-img-w: clamp(128px, 15vw, 200px);
+    --pers-img-w: clamp(121px, 14vw, 189px);
 
-    top: 114%;
-    left: 69%;
+    top: 82%;
+    left: 66%;
     z-index: 6;
     animation-delay: calc(var(--stagger-base) * 4);
   }
@@ -1168,8 +1257,9 @@
 
   .personagem--freeza {
    
-    top: 158%;
-    left: 41%;
+    --pers-img-w: clamp(119px, 20vw, 202px);
+    top: 191%;
+    left: 45%;
     z-index: 2;
     animation-delay: calc(var(--stagger-base) * 6);
   }
@@ -1250,7 +1340,7 @@
       left: auto;
       margin-inline-start: auto;
       margin-inline-end: 8%;
-      --pers-img-w: clamp(120px, 44vw, 190px);
+      --pers-img-w: clamp(72px, 26vw, 114px);
     }
 
     .personagem--gohan {
@@ -1258,7 +1348,7 @@
       left: auto;
       margin-inline-start: 14%;
       margin-inline-end: auto;
-      --pers-img-w: clamp(100px, 40vw, 160px);
+      --pers-img-w: clamp(65px, 26vw, 104px);
     }
 
     .personagem--kuririn {
@@ -1266,7 +1356,7 @@
       left: auto;
       margin-inline-start: auto;
       margin-inline-end: 12%;
-      --pers-img-w: clamp(116px, 46vw, 176px);
+      --pers-img-w: clamp(110px, 43vw, 167px);
     }
 
     .personagem--ginyu {
@@ -1282,7 +1372,7 @@
       left: auto;
       margin-inline-start: auto;
       margin-inline-end: 14%;
-      --pers-img-w: clamp(112px, 42vw, 184px);
+      --pers-img-w: clamp(63px, 24vw, 103px);
     }
   }
 
@@ -1712,16 +1802,16 @@
     transform: translateY(0);
   }
 
+  /* Nó da timeline = mini esfera do dragão (webp animado com fundo transparente). */
   .saga__node {
     position: absolute;
-    top: 0.5rem;
+    top: 0.05rem;
     left: var(--rail-x);
-    width: 0.95rem;
-    height: 0.95rem;
-    border-radius: var(--radius-full);
-    background: var(--accent-star);
+    width: 1.92rem;
+    height: 1.92rem;
+    background: url("../assets/images/esfera-dragao-1estrela.webp") center / contain no-repeat;
     transform: translateX(-50%);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-star) 22%, transparent), 0 0 14px var(--accent-star-glow);
+    filter: drop-shadow(0 0 8px var(--accent-star-glow));
   }
 
   .saga__card {
@@ -1970,8 +2060,8 @@
 
   /* 7o personagem: Piccolo */
   .personagem--piccolo {
-    --pers-img-w: clamp(120px, 16vw, 205px);
-    top: 150%;
+    --pers-img-w: clamp(199px, 26vw, 340px);
+    top: 158%;
     left: 68%;
     z-index: 3;
     animation-delay: calc(var(--stagger-base) * 7);
@@ -1990,7 +2080,59 @@
       left: auto;
       margin-inline-start: 12%;
       margin-inline-end: auto;
-      --pers-img-w: clamp(120px, 46vw, 190px);
+      --pers-img-w: clamp(199px, 71vw, 315px);
+    }
+  }
+
+  /* 8o personagem: Dodoria (capanga do Freeza) */
+  .personagem--dodoria {
+    --pers-img-w: clamp(168px, 22vw, 270px);
+    top: 199%;
+    left: 8%;
+    z-index: 4;
+    animation-delay: calc(var(--stagger-base) * 8);
+  }
+
+  @media (min-width: 768px) and (max-width: 1023.98px) {
+    .personagem--dodoria {
+      left: 4%;
+      top: 86%;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .personagem--dodoria {
+      top: auto;
+      left: auto;
+      margin-inline-start: auto;
+      margin-inline-end: 10%;
+      --pers-img-w: clamp(156px, 58vw, 240px);
+    }
+  }
+
+  /* 10o personagem: Zarbon (capanga do Freeza) */
+  .personagem--zarbon {
+    --pers-img-w: clamp(210px, 27vw, 338px);
+    top: 117%;
+    left: 33%;
+    z-index: 4;
+    animation-delay: calc(var(--stagger-base) * 9);
+  }
+
+  @media (min-width: 768px) and (max-width: 1023.98px) {
+    .personagem--zarbon {
+      left: 36%;
+      top: 90%;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .personagem--zarbon {
+      top: auto;
+      left: auto;
+      margin-inline-start: 8%;
+      margin-inline-end: auto;
+      --pers-img-w: clamp(195px, 72vw, 300px);
     }
   }
 
@@ -2091,6 +2233,10 @@
     transform: translateY(5%);
     /* Contraste/saturação compensam o leve "lavado" inerente ao screen. */
     filter: contrast(1.12) saturate(1.15) drop-shadow(0 8px 40px rgba(255, 180, 40, 0.28));
+    /* O screen levanta o preto do frame, então a borda direita do vídeo vira
+       uma linha vertical fina sobre o cenário. Esmaece essa borda interna. */
+    -webkit-mask-image: linear-gradient(to right, #000 76%, transparent 96%);
+    mask-image: linear-gradient(to right, #000 76%, transparent 96%);
   }
 
   /* Mancha escura atrás do Goku — torna o screen "sólido" naquela região. */
@@ -2124,8 +2270,13 @@
     /* Mesmo tratamento do Goku: remove o fundo preto do vídeo. */
     mix-blend-mode: screen;
     clip-path: inset(0 0 5% 0);
+    /* O recuo inicial de 30% pra direita é aplicado pelo GSAP (xPercent: 30 no
+       início da timeline) pra não dobrar com o transform do CSS — ver initHeroScroll. */
     transform: translateY(27%);
     filter: contrast(1.12) saturate(1.12) drop-shadow(0 8px 40px rgba(170, 70, 220, 0.30));
+    /* Mesma correção do Goku, mas a borda interna do Freeza é a esquerda. */
+    -webkit-mask-image: linear-gradient(to left, #000 76%, transparent 96%);
+    mask-image: linear-gradient(to left, #000 76%, transparent 96%);
   }
 
   /* Mancha escura atrás do Freeza — deixa o screen "sólido" naquela região. */
@@ -2340,13 +2491,16 @@
   .hero__poster-tag {
     margin: clamp(0.9rem, 2vw, 1.6rem) 0 0;
     font-family: var(--font-hero-saga);
-    font-weight: var(--fw-medium);
+    font-weight: var(--fw-semibold);
     font-size: clamp(0.72rem, 0.55rem + 0.7vw, 1.05rem);
     letter-spacing: 0.3em;
     text-indent: 0.3em;
     text-transform: uppercase;
-    color: var(--text-muted);
-    text-shadow: 0 2px 12px rgba(4, 6, 15, 0.9);
+    /* Creme quente + sombra densa: legível mesmo sobre o céu claro do fundo. */
+    color: #f7ecd2;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.92),
+      0 2px 12px rgba(4, 6, 15, 0.95);
   }
 
   @media (max-width: 767.98px) {

@@ -318,7 +318,7 @@ function initFloatingNav() {
  *
  * Atos:
  *  1. Entrada do título (linhas em stagger) ao carregar.
- *  2. Goku (esq.) e Freeza (dir.) avançam para o centro + leve zoom no scroll.
+ *  2. Goku (esq.) e Freeza (dir.) recuam pros próprios lados encolhendo até sair da tela no scroll.
  *  3. Zoom lento do vídeo de fundo.
  *  4. Título e seta "Role para começar" somem ao rolar.
  */
@@ -365,24 +365,31 @@ function initHeroScroll() {
       },
     });
 
-    if (poster) tl.to(poster, { yPercent: -30, opacity: 0, ease: 'none', duration: 0.4 }, 0);
+    // Título fica na tela com zoom suave durante todo o scroll e só some nos
+    // últimos ~18% — evita deixar a tela vazia no meio do caminho.
+    if (poster) {
+      tl.to(poster, { yPercent: -10, scale: 1.18, ease: 'none', duration: 1 }, 0);
+      tl.to(poster, { opacity: 0, ease: 'power2.in', duration: 0.06 }, 0.94);
+    }
     if (arrow) tl.to(arrow, { opacity: 0, ease: 'none', duration: 0.12 }, 0);
 
-    // Sem mexer em y: o GSAP preserva o translateY que o CSS já aplica
-    // (translateY 5% no Goku, 27% no Freeza) e anima só x + scale.
+    // Em vez de avançarem pro centro, os personagens RECUAM pros próprios lados
+    // encolhendo (como se fossem pra trás) até saírem da tela conforme o scroll.
+    // GSAP preserva o translateY que o CSS já aplica e anima só x + scale.
     if (goku) {
       tl.fromTo(goku,
         { xPercent: 0, scale: 1, transformOrigin: 'left bottom' },
-        { xPercent: 16, scale: 1.1, ease: 'none', duration: 1 }, 0);
+        { xPercent: -120, scale: 0.55, ease: 'power2.in', duration: 1 }, 0);
     }
-    if (gokuGlow) tl.fromTo(gokuGlow, { xPercent: 0 }, { xPercent: 16, ease: 'none', duration: 1 }, 0);
+    if (gokuGlow) tl.fromTo(gokuGlow, { xPercent: 0 }, { xPercent: -120, ease: 'power2.in', duration: 1 }, 0);
 
+    // Freeza começa na posição natural (xPercent 0, mais à frente) e sai pela direita.
     if (freeza) {
       tl.fromTo(freeza,
         { xPercent: 0, scale: 1, transformOrigin: 'right bottom' },
-        { xPercent: -16, scale: 1.1, ease: 'none', duration: 1 }, 0);
+        { xPercent: 120, scale: 0.55, ease: 'power2.in', duration: 1 }, 0);
     }
-    if (freezaGlow) tl.fromTo(freezaGlow, { xPercent: 0 }, { xPercent: -16, ease: 'none', duration: 1 }, 0);
+    if (freezaGlow) tl.fromTo(freezaGlow, { xPercent: 0 }, { xPercent: 120, ease: 'power2.in', duration: 1 }, 0);
 
     if (bgVideo) {
       tl.fromTo(bgVideo,
@@ -414,7 +421,10 @@ function initHeroScroll() {
       },
     });
 
-    if (poster) tl.to(poster, { yPercent: -20, opacity: 0, ease: 'none', duration: 0.4 }, 0);
+    if (poster) {
+      tl.to(poster, { yPercent: -8, scale: 1.12, ease: 'none', duration: 1 }, 0);
+      tl.to(poster, { opacity: 0, ease: 'power2.in', duration: 0.06 }, 0.94);
+    }
     if (arrow) tl.to(arrow, { opacity: 0, ease: 'none', duration: 0.12 }, 0);
     if (bgVideo) tl.fromTo(bgVideo, { scale: 1 }, { scale: 1.12, ease: 'none', duration: 1 }, 0);
   });
@@ -477,6 +487,18 @@ function initPersonagensParallax() {
       from: { x: 16, y: -30 },
       to: { x: -28, y: 184 },
       scrub: 1.0,
+    },
+    {
+      selector: '.personagem--dodoria',
+      from: { x: -12, y: -34 },
+      to: { x: 30, y: 172 },
+      scrub: 1.2,
+    },
+    {
+      selector: '.personagem--zarbon',
+      from: { x: 14, y: -30 },
+      to: { x: -30, y: 196 },
+      scrub: 0.9,
     },
   ];
 
@@ -942,11 +964,154 @@ function initBatalhaFinalVideoLoop() {
   }
 }
 
+/**
+ * Fundo de grade animada na seção #personagens — porte vanilla do componente
+ * "data-grid-hero" (21st.dev). Monta uma grade de células que pulsam a partir
+ * do centro e um glow que acompanha o cursor. Substitui o particles.js.
+ */
+function initPersonagensGrid() {
+  const grid = document.getElementById('personagens-grid');
+  if (!grid) return;
+
+  const wrap = grid.parentElement;
+  const reduce =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const CFG = {
+    targetCell: 30, // tamanho-alvo da célula (px)
+    maxCells: 1100, // teto de células (performance, seção é alta)
+    gap: 5,
+    duration: 5, // s
+    cellMin: 0.05,
+    cellMax: 0.5,
+    waveDelay: 0.2,
+  };
+
+  // Verde do componente original (21st.dev): hsl(150 100% 50%).
+  const color =
+    getComputedStyle(document.documentElement).getPropertyValue('--grid-cell-color').trim() ||
+    '#00ff80';
+
+  // Glow do cursor: criado uma vez, sobrevive aos rebuilds da grade.
+  let glow = null;
+  if (!reduce && wrap) {
+    glow = document.createElement('div');
+    glow.className = 'personagens__grid-glow';
+    wrap.appendChild(glow);
+  }
+
+  function build() {
+    const w = grid.clientWidth;
+    const h = grid.clientHeight;
+    if (!w || !h) return;
+
+    let cols = Math.max(6, Math.round(w / CFG.targetCell));
+    let rows = Math.max(6, Math.round(h / CFG.targetCell));
+    if (cols * rows > CFG.maxCells) {
+      const scale = Math.sqrt((cols * rows) / CFG.maxCells);
+      cols = Math.max(6, Math.round(cols / scale));
+      rows = Math.max(6, Math.round(rows / scale));
+    }
+
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+    grid.style.gap = CFG.gap + 'px';
+    grid.style.setProperty('--grid-color', color);
+    grid.style.setProperty('--cell-min', CFG.cellMin);
+    grid.style.setProperty('--cell-max', CFG.cellMax);
+
+    const centerR = Math.floor(rows / 2);
+    const centerC = Math.floor(cols / 2);
+    const total = rows * cols;
+    const frag = document.createDocumentFragment();
+
+    for (let i = 0; i < total; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell';
+      if (!reduce) {
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+        const dr = Math.abs(r - centerR);
+        const dc = Math.abs(c - centerC);
+        const delay = Math.sqrt(dr * dr + dc * dc) * CFG.waveDelay;
+        cell.style.animation = `cell-pulse ${CFG.duration}s ${delay.toFixed(
+          3
+        )}s infinite alternate ease-in-out`;
+      }
+      frag.appendChild(cell);
+    }
+
+    grid.innerHTML = '';
+    grid.appendChild(frag);
+  }
+
+  build();
+
+  // Blips do radar do Dragon Ball: 7 pontinhos amarelos piscando (1 por esfera),
+  // espalhados e fora do centro (onde fica o título/personagens).
+  if (wrap) {
+    for (let i = 0; i < 7; i++) {
+      const blip = document.createElement('div');
+      blip.className = 'personagens__grid-blip';
+      blip.style.left = (8 + Math.random() * 84).toFixed(2) + '%';
+      blip.style.top = (6 + Math.random() * 88).toFixed(2) + '%';
+      blip.style.animationDelay = (Math.random() * 1.6).toFixed(2) + 's';
+      blip.style.animationDuration = (1.3 + Math.random() * 1.0).toFixed(2) + 's';
+      wrap.appendChild(blip);
+    }
+  }
+
+  // Rebuild ao redimensionar (debounce via rAF; só se mudou de forma relevante).
+  let raf = 0;
+  let lastW = grid.clientWidth;
+  let lastH = grid.clientHeight;
+  function onResize() {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const w = grid.clientWidth;
+      const h = grid.clientHeight;
+      if (Math.abs(w - lastW) > 24 || Math.abs(h - lastH) > 60) {
+        lastW = w;
+        lastH = h;
+        build();
+      }
+    });
+  }
+  if (typeof ResizeObserver === 'function') {
+    new ResizeObserver(onResize).observe(grid);
+  } else {
+    window.addEventListener('resize', onResize);
+  }
+
+  // Glow acompanha o cursor (coordenadas relativas ao wrapper).
+  if (glow && wrap) {
+    window.addEventListener(
+      'mousemove',
+      (e) => {
+        const rect = wrap.getBoundingClientRect();
+        const inside =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
+        glow.style.opacity = inside ? '1' : '0';
+        if (inside) {
+          glow.style.setProperty('--mouse-x', e.clientX - rect.left + 'px');
+          glow.style.setProperty('--mouse-y', e.clientY - rect.top + 'px');
+        }
+      },
+      { passive: true }
+    );
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initFloatingNav();
   initHeroScroll();
   initPersonagensParallax();
-  initPersonagensBg();
+  initPersonagensGrid();
   initTrailersCarousel();
   initSagaReveal();
   initBatalhaFinalVideoLoop();
