@@ -365,11 +365,12 @@ function initHeroScroll() {
       },
     });
 
-    // Título fica na tela com zoom suave durante todo o scroll e só some nos
-    // últimos ~18% — evita deixar a tela vazia no meio do caminho.
+    // O título acompanha o scroll: sobe com zoom suave e vai SUMINDO de forma
+    // progressiva (não só no fim). O fade fica amarrado ao scroll e termina por
+    // volta de 80%, enquanto os personagens ainda recuam pros lados.
     if (poster) {
       tl.to(poster, { yPercent: -10, scale: 1.18, ease: 'none', duration: 1 }, 0);
-      tl.to(poster, { opacity: 0, ease: 'power2.in', duration: 0.06 }, 0.94);
+      tl.to(poster, { opacity: 0, ease: 'none', duration: 0.7 }, 0.1);
     }
     if (arrow) tl.to(arrow, { opacity: 0, ease: 'none', duration: 0.12 }, 0);
 
@@ -423,7 +424,8 @@ function initHeroScroll() {
 
     if (poster) {
       tl.to(poster, { yPercent: -8, scale: 1.12, ease: 'none', duration: 1 }, 0);
-      tl.to(poster, { opacity: 0, ease: 'power2.in', duration: 0.06 }, 0.94);
+      // Mesmo fade progressivo da versão desktop.
+      tl.to(poster, { opacity: 0, ease: 'none', duration: 0.7 }, 0.1);
     }
     if (arrow) tl.to(arrow, { opacity: 0, ease: 'none', duration: 0.12 }, 0);
     if (bgVideo) tl.fromTo(bgVideo, { scale: 1 }, { scale: 1.12, ease: 'none', duration: 1 }, 0);
@@ -777,30 +779,115 @@ function initPersonagensBg() {
 }
 
 /**
- * Revela os itens da linha do tempo (#saga) conforme entram na viewport.
+ * Animações de ENTRADA das seções depois da hero (#personagens, #trailers,
+ * #saga) com GSAP + ScrollTrigger: cada bloco é revelado ao entrar na viewport.
+ *
+ * Antes esses blocos animavam via @keyframes no CSS disparando no load — como
+ * ficam abaixo da dobra, a animação se perdia antes do usuário rolar até lá.
+ * Aqui o gatilho é o scroll, então a entrada acontece na hora certa.
+ *
+ * Detalhes importantes:
+ *  - Nos personagens animamos SÓ opacity: o transform (x/y) é do parallax
+ *    (initPersonagensParallax), então mexer em transform aqui brigaria com ele.
+ *  - Tudo dentro de matchMedia('prefers-reduced-motion: no-preference'): com
+ *    movimento reduzido o GSAP não esconde nada (o conteúdo aparece estático).
+ *    Sem GSAP (CDN fora do ar) o CSS já deixa tudo visível por padrão.
  */
-function initSagaReveal() {
-  const items = document.querySelectorAll('.saga__item');
-  if (!items.length) return;
+function initSectionReveals() {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-  if (typeof IntersectionObserver === 'undefined') {
-    items.forEach((el) => el.classList.add('is-visible'));
-    return;
-  }
+  gsap.registerPlugin(ScrollTrigger);
 
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          io.unobserve(entry.target);
-        }
+  const mm = gsap.matchMedia();
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    // #personagens — título e subtítulo sobem desfocando.
+    const persHeader = document.querySelector('.personagens__header');
+    if (persHeader) {
+      gsap.from('.personagens__title, .personagens__subtitle', {
+        y: 32,
+        opacity: 0,
+        filter: 'blur(8px)',
+        duration: 0.8,
+        stagger: 0.12,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: persHeader, start: 'top 85%', once: true },
       });
-    },
-    { threshold: 0.2, rootMargin: '0px 0px -10% 0px' }
-  );
+    }
 
-  items.forEach((el) => io.observe(el));
+    // #personagens — figures surgem em stagger aleatório (só opacity: o
+    // transform é do parallax).
+    const persStage = document.querySelector('.personagens__stage');
+    const figures = gsap.utils.toArray('.personagem');
+    if (persStage && figures.length) {
+      gsap.from(figures, {
+        opacity: 0,
+        duration: 0.7,
+        ease: 'power2.out',
+        stagger: { each: 0.07, from: 'random' },
+        scrollTrigger: { trigger: persStage, start: 'top 78%', once: true },
+      });
+    }
+
+    // #trailers — header em stagger e, logo depois, o carrossel sobe.
+    const trailersHeader = document.querySelector('.trailers__header');
+    if (trailersHeader) {
+      gsap.from('.trailers__eyebrow, .trailers__title, .trailers__subtitle', {
+        y: 32,
+        opacity: 0,
+        filter: 'blur(8px)',
+        duration: 0.7,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: trailersHeader, start: 'top 85%', once: true },
+      });
+    }
+
+    const carousel = document.querySelector('.trailers__carousel');
+    if (carousel) {
+      gsap.from(carousel, {
+        y: 48,
+        opacity: 0,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: carousel, start: 'top 85%', once: true },
+      });
+    }
+
+    // #saga — header em stagger.
+    const sagaHeader = document.querySelector('.saga__header');
+    if (sagaHeader) {
+      gsap.from('.saga__eyebrow, .saga__title, .saga__subtitle, .saga__divider', {
+        y: 32,
+        opacity: 0,
+        filter: 'blur(8px)',
+        duration: 0.75,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: sagaHeader, start: 'top 85%', once: true },
+      });
+    }
+
+    // #saga — cada item da timeline revela ao entrar (batch agrupa os que
+    // entram juntos e aplica o stagger). Substitui o IntersectionObserver antigo.
+    const sagaItems = gsap.utils.toArray('.saga__item');
+    if (sagaItems.length) {
+      gsap.set(sagaItems, { opacity: 0, y: 32 });
+      ScrollTrigger.batch(sagaItems, {
+        start: 'top 88%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            stagger: 0.12,
+            ease: 'power3.out',
+            overwrite: true,
+          }),
+      });
+    }
+  });
 }
 function initTrailersCarousel() {
   const root = document.querySelector('.trailers__carousel');
@@ -1113,7 +1200,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPersonagensParallax();
   initPersonagensGrid();
   initTrailersCarousel();
-  initSagaReveal();
+  initSectionReveals();
   initBatalhaFinalVideoLoop();
 
   // Recalcula as posições do ScrollTrigger depois que toda a mídia (vídeos,

@@ -1118,8 +1118,6 @@
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: var(--accent-star);
-    opacity: 0;
-    animation: personagens-header-in 760ms var(--ease-out-expo) forwards;
   }
 
   .personagens__title {
@@ -1130,8 +1128,6 @@
     letter-spacing: var(--ls-tight);
     line-height: var(--lh-tight);
     color: var(--text-primary);
-    opacity: 0;
-    animation: personagens-header-in 760ms var(--ease-out-expo) 55ms forwards;
   }
 
   .personagens__subtitle {
@@ -1143,19 +1139,6 @@
     letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     color: var(--text-muted);
-    opacity: 0;
-    animation: personagens-header-in 760ms var(--ease-out-expo) 110ms forwards;
-  }
-
-  @keyframes personagens-header-in {
-    from {
-      opacity: 0;
-      transform: translate3d(0, 0.85rem, 0);
-    }
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
   }
 
   .personagens__stage {
@@ -1177,8 +1160,6 @@
     margin: 0;
     width: max-content;
     max-width: min(94vw, 360px);
-    opacity: 0;
-    animation: personagem-reveal-opacity-only 740ms var(--ease-out-expo) forwards;
   }
 
   .personagem img {
@@ -1196,16 +1177,6 @@
     line-height: var(--lh-tight);
     text-align: center;
     color: var(--text-primary);
-  }
-
-  /* Só opacity: o parallax GSAP controla transform nos figures (evita conflito com keyframes) */
-  @keyframes personagem-reveal-opacity-only {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
   }
 
   /* Quadrantes distintos: top/left únicos por checklist; escalas grandes / médias / menor */
@@ -1376,20 +1347,6 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .personagens__eyebrow,
-    .personagens__title,
-    .personagens__subtitle {
-      animation: none;
-      opacity: 1;
-    }
-
-    .personagem {
-      animation: none !important;
-      opacity: 1;
-    }
-  }
-
   .trailers {
     position: relative;
     isolation: isolate;
@@ -1439,8 +1396,6 @@
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: var(--accent-star);
-    opacity: 0;
-    animation: trailers-reveal 620ms var(--ease-out-expo) forwards;
   }
 
   .trailers__title {
@@ -1452,8 +1407,6 @@
     letter-spacing: var(--ls-tight);
     color: var(--text-primary);
     text-wrap: balance;
-    opacity: 0;
-    animation: trailers-reveal 620ms var(--ease-out-expo) var(--stagger-base) forwards;
   }
 
   .trailers__subtitle {
@@ -1464,20 +1417,6 @@
     letter-spacing: var(--ls-label);
     text-transform: uppercase;
     color: var(--text-faint);
-    opacity: 0;
-    animation: trailers-reveal 620ms var(--ease-out-expo) calc(var(--stagger-base) * 2) forwards;
-  }
-
-  @keyframes trailers-reveal {
-    from {
-      opacity: 0;
-      transform: translate3d(0, 0.75rem, 0);
-    }
-
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
   }
 
   .trailers__carousel {
@@ -1632,14 +1571,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .trailers__eyebrow,
-    .trailers__title,
-    .trailers__subtitle {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
-
     .trailers__track,
     .trailers__arrow,
     .trailers__dot {
@@ -1788,18 +1719,10 @@
     position: relative;
     padding-left: calc(var(--rail-x) + clamp(1.5rem, 5vw, 2.75rem));
     padding-bottom: clamp(var(--space-8), 4vw, var(--space-12));
-    opacity: 0;
-    transform: translateY(1.5rem);
-    transition: opacity 700ms var(--ease-out-expo), transform 700ms var(--ease-out-expo);
   }
 
   .saga__item:last-child {
     padding-bottom: 0;
-  }
-
-  .saga__item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
   }
 
   /* Nó da timeline = mini esfera do dragão (webp animado com fundo transparente). */
@@ -1889,13 +1812,6 @@
     color: var(--text-muted);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .saga__item {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-  }
   .section {
     padding: var(--space-section-y) var(--space-gutter-x);
     background-color: var(--bg-mid);
